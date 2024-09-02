@@ -27,10 +27,10 @@ Detailed tasks as below:
 
 ## Expected compensation
 
-The total amount of the contract was calculated with an hourly rate of \$40 CAD, and I expect the project to take around 180 hours (i.e., 22 working days). This translates to a total cost of \$7200 CAD. Detailed hours will be noted while working and will be communicated with the Birds Canada supervisor.
+The total amount of the contract was calculated with an hourly rate of \$40 CAD, and I expect the project to take around 180 hours (expected hours with itemized tasks as below). This translates to a total cost of \$7200 CAD. Detailed hours will be recorded while working and will be communicated with the Birds Canada supervisor.
 
 | Expected hours | Task                                                                                            |
-|----------------------|--------------------------------------------------|
+|-----------------------|-------------------------------------------------|
 | 8              | Data organization and documentation, collecting necessary information for the upcoming analysis |
 | 16             | Analyze 2023 ARU data through BirdNET                                                           |
 | 24             | Analyze 2024 ARU data through BirdNET                                                           |
