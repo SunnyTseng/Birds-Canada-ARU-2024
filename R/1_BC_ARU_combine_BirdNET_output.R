@@ -4,7 +4,10 @@
 
 library(tidyverse)
 library(here)
+
 library(ggbreak)
+library(RColorBrewer)
+library(ggforce)
 
 
 # combine data ------------------------------------------------------------
@@ -107,11 +110,11 @@ detections_2023_2024_focal <- detections_2023_2024_filter %>%
          location = if_else(year == "2023", 
                             str_split_i(filepath, "\\\\", 4),
                             str_split_i(site, " - ", 2))) %>%
-  mutate(site = str_split_i(site, " - ", 1)) %>% 
-  select(site, location, date, datetime, year, month, day, hour, minute,
+  mutate(site = str_split_i(site, " - ", 1),
+         site_location = paste0(site, "_", location)) %>% 
+  select(site_location, site, location, 
+         date, datetime, year, month, day, hour, minute,
          start, end, scientific_name, common_name, confidence, filepath) 
-
-
 
 # Save the combined data to a rda file
 save(object = detections_2023_2024_focal, file = here("data", "detections_2023_2024_focal.rda"))
@@ -124,13 +127,48 @@ save(object = detections_2023_2024_focal, file = here("data", "detections_2023_2
 
 load("G:/Birds-Canada-ARU-2024/data/detections_2023_2024_focal.rda")
 
-detections_2023_2024_focal %>% 
+vis_data <- detections_2023_2024_focal %>%
+  mutate(hour = fct_inorder(factor(hour))) %>%
+  filter(confidence >= 0.5)
+
+# detection counts by date by species
+
+my_colors <- colorRampPalette(brewer.pal(8, "Set2"))(26)
+
+vis_data %>% 
   ggplot() +
-  geom_bar(aes(x = date), stat = "count") +
-  scale_x_break(c(ymd("2023-06-22"), ymd("2024-05-25")))
+  geom_bar(aes(x = date, fill = common_name), stat = "count") +
+  scale_x_date(date_breaks = "12 days",
+               date_minor_breaks = "2 days",
+               date_labels = "%b %d") +
+  #scale_x_break(c(ymd("2023-06-22"), ymd("2024-05-28"))) +
+  scale_fill_manual(values = my_colors) +
+  facet_grid_paginate(common_name ~ year, 
+                      scales = "free", ncol = 2, nrow = 4, page = 1) +
+  labs(x = "Day of year",
+       y = "Number of detections") +
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 16),
+        axis.title.x = element_text(margin = margin(t = 6)),  # Adjust top margin for x-axis title
+        axis.title.y = element_text(margin = margin(r = 10)))
   
 
-
+# detection counts by time of a day by species
+vis_data %>%
+  ggplot() +
+  geom_bar(aes(x = hour), stat = "count") +
+  facet_wrap(~common_name, scales = "free_y", ncol = 6) +
+  scale_x_discrete(labels = c("22", "", "00", "", "02", "", "04", 
+                              "", "06", "", "08", "", "10")) +
+  labs(title = "Number of species detections by time of a day (universal threshold = 0.5)",
+       x = "Time of a day",
+       y = "Number of detections") +
+  theme_bw() +
+  theme(axis.text = element_text(size = 11),
+        axis.title = element_text(size = 16))
+  
 
 
 
