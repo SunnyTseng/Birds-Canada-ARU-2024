@@ -4,6 +4,7 @@
 
 library(tidyverse)
 library(here)
+library(ggbreak)
 
 
 # combine data ------------------------------------------------------------
@@ -38,11 +39,13 @@ all_csv_files <- list.files(path = dir,
 
 filtered_csv_files <- all_csv_files[!grepl("nocturnal_random_selected", all_csv_files)]
 
+
+
 # Initialize a vector to store any files that cause errors
 error_files <- c()
 
 # Use map_dfr with tryCatch to handle errors gracefully
-combined_data <- filtered_csv_files %>% 
+detections_2023_2024 <- filtered_csv_files %>% 
   map_dfr(~ {
     tryCatch(
       read_csv(.x, col_types = column_spec),
@@ -70,8 +73,67 @@ if (length(error_files) > 0) {
   message("All files loaded successfully.")
 }
 
-# Save the combined data to a .csv file
-write_csv(combined_data, "combined_data.csv")
+# Save the combined data to a rda file
+save(object = detections_2023_2024, file = here("data", "detections_2023_2024.rda"))
+
+
+
+
+
+# filter data only for target species -------------------------------------
+
+project_focal_species <- read_csv(here("data", "NEW ARU Focal Species List.csv"))
+load(file = here("data", "detections_2023_2024.rda"))
+
+detections_2023_2024_filter <- detections_2023_2024 %>% 
+  filter(common_name %in% project_focal_species$`Species name`) 
+
+# double-check that the White-winged scoter is not detected
+project_focal_species$`Species name`[!project_focal_species$`Species name` %in% detections_2023_2024_filter$common_name]
+"Melanitta deglandi" %in% detections_2023_2024$scientific_name
+
+# mutate necessary columns
+detections_2023_2024_focal <- detections_2023_2024_filter %>% 
+  mutate(filename = str_split_i(filepath, "\\\\", -1),
+         year = str_extract(filename, "202[34]"),         # Matches years from 2020 to 2099
+         month = str_extract(filename, "(?<=202[34])\\d{2}"), # Extracts 2 digits after the year for the month
+         day = str_extract(filename, "(?<=202[34]\\d{2})\\d{2}"), # Extracts 2 digits after year and month for the day)
+         hour = str_extract(filename, "(?<=202[34]\\d{4}.{1})\\d{2}"), # Extracts 2 digits after year, month, and day for the hour
+         minute = str_extract(filename, "(?<=202[34]\\d{4}.{3})\\d{2}"), # Extracts 2 digits after year, month, day, and hour for the minute
+         second = str_extract(filename, "(?<=202[34]\\d{4}.{5})\\d{2}"), # Extracts 2 digits after year, month, day, hour, and minute for the second
+         datetime = paste(year, month, day, hour, minute, second, sep = "-") %>% ymd_hms(),
+         date = as.Date(datetime)) %>% 
+  mutate(site = str_split_i(filepath, "\\\\", 3),
+         location = if_else(year == "2023", 
+                            str_split_i(filepath, "\\\\", 4),
+                            str_split_i(site, " - ", 2))) %>%
+  mutate(site = str_split_i(site, " - ", 1)) %>% 
+  select(site, location, date, datetime, year, month, day, hour, minute,
+         start, end, scientific_name, common_name, confidence, filepath) 
+
+
+
+# Save the combined data to a rda file
+save(object = detections_2023_2024_focal, file = here("data", "detections_2023_2024_focal.rda"))
+
+
+
+
+
+# visualization of number of detections across time ------------------------
+
+load("G:/Birds-Canada-ARU-2024/data/detections_2023_2024_focal.rda")
+
+detections_2023_2024_focal %>% 
+  ggplot() +
+  geom_bar(aes(x = date), stat = "count") +
+  scale_x_break(c(ymd("2023-06-22"), ymd("2024-05-25")))
+  
+
+
+
+
+
 
 
 
