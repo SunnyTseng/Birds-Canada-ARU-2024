@@ -34,6 +34,8 @@ As with the previous analysis, we applied a universal confidence threshold of 0.
 
 ## Next steps
 - Set up the system for validating recording segments (360 segments per species)
+- Extract the recording segments that needs to be validated (rename them properly)
+- Finalize the Shiny App validation interface
 - Determine species-specific thresholds for target species
 
 ## Focal species list
