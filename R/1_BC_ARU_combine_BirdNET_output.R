@@ -112,7 +112,8 @@ detections_2023_2024_focal <- detections_2023_2024_filter %>%
                             str_split_i(site, " - ", 2))) %>%
   mutate(site = str_split_i(site, " - ", 1),
          site_location = paste0(site, "_", location)) %>% 
-  select(site_location, site, location, 
+  mutate(id = row_number()) %>%
+  select(id, site_location, site, location, 
          date, datetime, year, month, day, hour, minute,
          start, end, scientific_name, common_name, confidence, filepath) 
 
@@ -144,7 +145,7 @@ vis_data %>%
   #scale_x_break(c(ymd("2023-06-22"), ymd("2024-05-28"))) +
   scale_fill_manual(values = my_colors) +
   facet_grid_paginate(common_name ~ year, 
-                      scales = "free", ncol = 2, nrow = 4, page = 1) +
+                      scales = "free", ncol = 2, nrow = 4, page = 1) + # change the page num to view
   labs(x = "Day of year",
        y = "Number of detections") +
   theme_bw() +
