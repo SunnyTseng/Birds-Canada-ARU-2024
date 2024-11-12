@@ -3,5 +3,7 @@
 .RData
 .Ruserdata
 
+data/BirdNET_detections
 data/validation_recordings
+data/audio_output
 data/Chilcotin_Cariboo_ARU_2023_2024_BirdNET_output
