@@ -12,7 +12,7 @@ library(seewave)
 
 # load data ---------------------------------------------------------------
 
-load("G:/Birds-Canada-ARU-2024/data/detections_2023_2024_focal.rda")
+load(here("data", "BirdNET_detections", "detections_2023_2024_focal.rda"))
 
 # function for moving recordings to a given folder
 move_recording <- function(id, filepath, start, end, 
@@ -38,7 +38,7 @@ set.seed(2024)
 
 species <- detections_2023_2024_focal %>%
   pull(common_name) %>% 
-  unique()
+  unique() 
 
 # loop through species 
 
@@ -53,7 +53,7 @@ for (target_species in species) {
   # validation table
   table <- detections_2023_2024_focal %>%
     filter(common_name == target_species) %>%
-    mutate(category = cut(confidence, breaks = seq(0.1, 0.95, by = 0.05))) %>%
+    mutate(category = cut(confidence, breaks = seq(0.1, 1, by = 0.05), right = FALSE)) %>%
     slice_sample(n = 20, by = category) 
   
   write_csv(table, file.path(species_folder, paste0(target_species, "_validation.csv")))
