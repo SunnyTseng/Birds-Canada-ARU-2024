@@ -56,6 +56,14 @@ for (target_species in species) {
     mutate(category = cut(confidence, breaks = seq(0.1, 1, by = 0.05), right = FALSE)) %>%
     slice_sample(n = 20, by = category) 
   
+  # select 25 out of each bin if there are not enough sample size
+  if (nrow(table) < 180) {
+    table <- detections_2023_2024_focal %>%
+      filter(common_name == target_species) %>%
+      mutate(category = cut(confidence, breaks = seq(0.1, 1, by = 0.05), right = FALSE)) %>%
+      slice_sample(n = 50, by = category) 
+  }
+  
   write_csv(table, file.path(species_folder, paste0(target_species, "_validation.csv")))
   
   # move recordings
@@ -63,8 +71,26 @@ for (target_species in species) {
 }
 
 
+# top recordings to test single species -----------------------------------
 
+species <- "Yellow Rail"
 
+# manage species folder
+species_folder <- here("data", "individual_recordings", target_species)
+
+if (!dir.exists(species_folder)) {
+  dir.create(species_folder, recursive = TRUE)
+}
+
+# validation table
+table <- detections_2023_2024_focal %>%
+  filter(common_name == target_species) %>%
+  slice_max(confidence, n = 40)
+
+write_csv(table, file.path(species_folder, paste0(target_species, "_validation.csv")))
+
+# move recordings
+pmap(table, move_recording)   
 
 
 
