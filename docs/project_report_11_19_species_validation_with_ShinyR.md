@@ -1,7 +1,7 @@
 Progress report - species validation with Shiny App
 ================
 Sunny Tseng
-2024-11-18
+2024-11-19
 
 ### Quick review
 
@@ -30,20 +30,21 @@ these steps:
 
 - Download the whole folder for the species that you selected
 
-<!-- -->
-
 - In the selected species folder, open the “SPECIES NAME_validation.csv”
   file. Add two new columns beside the category column labeled
   “validation” and “note.”
+
+  <!-- -->
 
   ![](images/clipboard-1183498283.png)
 
 <!-- -->
 
-- Listen to each recording and view the spectrogram if needed. If the
-  BirdNET detection is accurate (e.g., Sora is present in the
-  recording), enter “Y” in the validation column. If it is not accurate
-  (e.g., no Sora was heard), enter “N.”
+- Listen to each recording and view the spectrogram if needed. Enter “Y”
+  in the validation column if the BirdNET detection is accurate (e.g.,
+  Sora is present in the recording). Enter “N” in the validation column
+  if the detection is not accurate (e.g., no Sora was heard). Enter “U”
+  if unsure.
 - Record notes on specific vocalizations (e.g., song, call, begging
   call) and/or possible reasons for misidentification (e.g., background
   noise, misidentified as XYZ species).
@@ -52,10 +53,10 @@ these steps:
 
 ### Use ShinyR to listen/view spectrogram (optional)
 
-- Open RStudio, enter the following chunk of code.
+- Open RStudio, run the following chunk of code.
 
 ``` r
-# use install.packages("PACKAGE_NAME") if you don't have any of the following required package
+# use install.packages("PACKAGE_NAME") if you don't have the following required packages installed yet
 
 library(shiny) 
 library(bslib)
@@ -73,9 +74,12 @@ shiny::runGitHub("Birds-Canada-ARU-2024", "SunnyTseng", subdir = "R")
 ```
 
 - An interface should pop up if all goes well. This interface required
-  two entries: 1. The .csv file that contains the meta data of the
-  segments, and 2. The file path of the folder that contains the
-  segments.
+  two entries:
+  - The .csv file that contains the meta data of the segments. This is
+    the .csv file in the species folder that you downloaded from the
+    Google Drive.
+  - The file path of the folder that contains the segments. This is the
+    species folder that you downloaded.
 
 | select meta data                     | select recording folder              |
 |--------------------------------------|--------------------------------------|
