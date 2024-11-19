@@ -1,13 +1,11 @@
 ---
 title: "Progress report - species validation with Shiny App"
 author: "Sunny Tseng"
-date: "`r Sys.Date()`"
+date: "2024-11-18"
 output: pdf_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+
 
 ### Quick review
 
@@ -39,8 +37,8 @@ All validation datasets are stored in a [Google Drive](https://drive.google.com/
 
 -   Open RStudio, enter the following chunk of code.
 
-```{r, eval = FALSE}
 
+```r
 # use install.packages("PACKAGE_NAME") if you don't have any of the following required package
 
 library(shiny) 

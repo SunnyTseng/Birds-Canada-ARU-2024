@@ -54,7 +54,7 @@ for (target_species in species) {
   table <- detections_2023_2024_focal %>%
     filter(common_name == target_species) %>%
     mutate(category = cut(confidence, breaks = seq(0.1, 1, by = 0.05), right = FALSE)) %>%
-    slice_sample(n = 20, by = category) 
+    slice_sample(n = 10, by = category) 
   
   write_csv(table, file.path(species_folder, paste0(target_species, "_validation.csv")))
   
