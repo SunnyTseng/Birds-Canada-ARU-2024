@@ -162,7 +162,7 @@ server <- function(input, output, session) {
       datatable(editable = TRUE,
                 escape = FALSE,
                 selection = "none",
-                options = list(pageLength = 5,
+                options = list(pageLength = 10,
                                columDefs = list(list(targets = ncol(rv$data_display) + 1, orderable = FALSE),
                                                 list(targets = ncol(rv$data_display) + 2, orderable = FALSE)))
       )
