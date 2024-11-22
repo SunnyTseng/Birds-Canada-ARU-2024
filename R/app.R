@@ -108,14 +108,24 @@ server <- function(input, output, session) {
   # reactive values --------------------------------------------------------
   
   roots <- if (.Platform$OS.type == "windows") {
+    # List all available drives on Windows
+    drives <- system("wmic logicaldisk get name", intern = TRUE)
+    drives <- gsub("\\s", "", drives[-1])  # Clean up drive names
+    
     c(Desktop = file.path(Sys.getenv("USERPROFILE"), "Desktop"),
       Documents = file.path(Sys.getenv("USERPROFILE"), "Documents"),
-      Working_dir = ".")
+      Working_dir = ".",
+      setNames(drives, drives)) # Add drives with their names as keys
   } else {
+    # For Unix-like systems, include common mount points
+    external_drives <- list.files("/Volumes", full.names = TRUE)
+    
     c(Desktop = "~/Desktop",
       Documents = "~/Documents",
-      Working_dir = ".")
+      Working_dir = ".",
+      setNames(external_drives, basename(external_drives))) # Use volume names
   }
+  
   
   shinyDirChoose(
     input,
