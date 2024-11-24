@@ -28,7 +28,8 @@ view_spectrogram <- function(filepath, flim, wl) {
   
   # Plot the spectrogram
   seewave::spectro(song, f = song@samp.rate, flim = flim, ovlp = 50,
-                   collevels = seq(-40, 0, 1), wl = wl, scale = FALSE)
+                   collevels = seq(-40, 0, 1), wl = wl, scale = FALSE,
+                   main = str_extract(filepath, "[^/]+(?=\\.wav$)"))
 }
 
 
