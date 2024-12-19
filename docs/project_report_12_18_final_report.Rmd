@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, eval = FALSE)
 ```
 
-## **Overview** 
+## **Overview**
 
 This project was contracted to Sunny Tseng by Birds Canada, with the goal of processing the audio data collected by Birds Canada in the field and providing a descriptive report on the detections. This document serves as the final report, summarizing the methods employed in the analysis and presenting the results. All R code developed during the project is available on the "[Birds Canada ARU 2024](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/tree/main)" GitHub page.
 
@@ -83,7 +83,13 @@ A total of 27 species were identified as focal species for this analysis. These 
 read_csv(here("data", "bird_list", "NEW ARU Focal Species List.csv")) %>% pull("Species name")
 ```
 
-After filtering the dataset to include only the 27 focal species, 788,511 detections were retained. This filtered dataset represents 26 of the 27 focal species, with the White-winged Scoter being the only species not detected in any recordings. The filtered dataset contains 788,511 rows.
+After filtering the dataset to include only the 27 focal species, 788,511 detections were retained. This filtered dataset represents 26 of the 27 focal species, with the White-winged Scoter being the only species not detected in any recordings. The filtered dataset contains 788,511 rows. The complete dataset is available for download from the project’s GitHub page in `.rda` file format. To load and view the dataset in R, use the following line of code:
+
+```{r}
+
+# edit file path as needed
+load(here("data", "BirdNET_detections", "detections_2023_2024_focal.rda"))
+```
 
 The objective of selecting these focal species is to identify BirdNET species-specific thresholds. The aim of setting species-specific threshold is to maximize true-positive detections while minimizing false-positives. To achieve this, we applied the methods proposed by [Wood and Kahl (2024)](https://link.springer.com/article/10.1007/s10336-024-02144-5) and [Tseng et al. (2024)](https://github.com/SunnyTseng/thesis_aru_BirdNET_evaluation/blob/main/R/Ch1_10_step_by_step_tutorial/species_specific_method_tutorial.md) for establishing species-specific thresholds for BirdNET.
 
@@ -103,6 +109,39 @@ include_graphics(here("docs", "figures", "calibration_curves_logistic.PNG"))
 
 ```
 
-### Species-specific thresholds (precision = 0.9) & validated dataset
+### Species-specific thresholds (precision = 0.9, 0.95, 0.99) 
 
-### Preliminary analysis
+To determine species-specific thresholds, I back-transformed the model output to predict the probability of each BirdNET detection being a true positive based on the reported confidence value. I then identified the confidence threshold required to achieve a certain precision (i.e., 0.9, 0.95, 0.99), meaning the percentage of detections retained after applying this threshold were true positives. For detailed methods, refer to [Tseng et al. (2024)](https://github.com/SunnyTseng/thesis_aru_BirdNET_evaluation/blob/main/R/Ch1_10_step_by_step_tutorial/species_specific_method_tutorial.md).
+
+```{r echo = FALSE, eval = TRUE}
+
+load(here("docs", "tables", "threshold_table.rda"))
+
+datatable(
+  threshold_table,
+  options = list(
+    pageLength = 10,   # Number of rows to display per page
+    scrollY = "400px", # Height of the scrollable area
+    scrollCollapse = TRUE # Allow the table to collapse when fewer rows are present
+  )
+)
+```
+
+### Daily activity (after applying species-specific threshold with precision = 0.95)
+
+```{r echo = FALSE, eval = TRUE}
+
+include_graphics(here("docs", "figures", "daily_pattern_0.95.PNG"))
+```
+
+### Seasonal activity (after applying species-specific threshold with precision = 0.95)
+
+```{r echo = FALSE, eval = TRUE}
+
+include_graphics(here("docs", "figures", "seasonal_pattern_0.95_1.PNG"))
+
+include_graphics(here("docs", "figures", "seasonal_pattern_0.95_2.PNG"))
+
+include_graphics(here("docs", "figures", "seasonal_pattern_0.95_3.PNG"))
+
+```

@@ -6,6 +6,7 @@ library(tidyverse)
 library(here)
 
 library(RColorBrewer)
+library(ggforce)
 
 
 # functions ---------------------------------------------------------------
@@ -40,7 +41,65 @@ precision2threshold <- function(threshold_table, precision){
 }
 
 
-# data imput --------------------------------------------------------------
+# function to get the threshold given desired precision for multiple species
+get_species_thresholds <- function(species_list, precision_target, 
+                                   validated_all, detections_2023_2024_focal) {
+  
+  # Initialize the vector to store results
+  thresholds <- numeric(length(species_list))
+  names(thresholds) <- species_list
+  
+  for (species in species_list) {
+    
+    # Attempt to fit the model, handle warnings/errors
+    model <- tryCatch(
+      {
+        validated_all %>%
+          filter(common_name == species) %>%
+          glm(validation ~ confidence, 
+              data = ., 
+              family = binomial)
+      },
+      warning = function(w) {
+        message(paste("Warning for species:", species, "-", conditionMessage(w)))
+        return(NULL)  # Return NULL if there's a warning
+      },
+      error = function(e) {
+        message(paste("Error for species:", species, "-", conditionMessage(e)))
+        return(NULL)  # Return NULL if there's an error
+      }
+    )
+    
+    # If the model is NULL (did not converge), assign threshold of 1
+    if (is.null(model)) {
+      thresholds[species] <- 1
+      next  # Skip the remaining steps for this iteration
+    }
+    
+    # Predict probabilities for the species
+    probability <- detections_2023_2024_focal %>%
+      filter(common_name == species) %>%
+      mutate(probability = predict(model, newdata = ., type = "response")) 
+    
+    # Create a threshold table with precision and data retention
+    threshold_table <- tibble(threshold = seq(0, 1, 0.001)) %>%
+      mutate(data_remained = map_dbl(.x = threshold, 
+                                     .f = ~ threshold2remain(probability, .x))) %>%
+      mutate(precision = map_dbl(.x = threshold, 
+                                 .f = ~ threshold2precision(probability, .x)))
+    
+    # Get the threshold for the desired precision
+    t_target <- precision2threshold(threshold_table, precision_target)
+    
+    # Append the result to the thresholds vector
+    thresholds[species] <- t_target
+  }
+  
+  return(thresholds)
+}
+
+
+# data input --------------------------------------------------------------
 
 
 load(here("data", "BirdNET_detections", "detections_2023_2024.rda"))
@@ -142,62 +201,98 @@ ggsave(plot = g,
 
 # species-specific thresholds ---------------------------------------------
 
-
-species_list <- validated_all %>%
-  pull(common_name) %>%
+species_list <- validated_all %>% 
+  pull(common_name) %>% 
   unique()
 
-threshold_0.9 <- c()
-# Loop through each species
-for (species in species_list) {
-  
-  result <- tryCatch({
-    # Fit the model
-    model <- validated_all %>% 
-      filter(common_name == species) %>%
-      glm(validation ~ confidence, 
-          data = .,
-          family = binomial)
-    
-    # Predict probabilities for the species
-    probability <- detections_2023_2024_focal %>%
-      filter(common_name == species) %>%
-      mutate(probability = predict(model, newdata = ., type = "response")) 
-    
-    # Create a threshold table with precision and data retention
-    threshold_table <- tibble(threshold = seq(0, 1, 0.001)) %>%
-      mutate(data_remained = map_dbl(.x = threshold, 
-                                     .f = ~ threshold2remain(probability, .x))) %>%
-      mutate(precision = map_dbl(.x = threshold, 
-                                 .f = ~ threshold2precision(probability, .x)))
-    
-    # Get the t_0.9 threshold
-    t_0.9 <- precision2threshold(threshold_table, 0.9)
-    
-    # Return the calculated t_0.9
-    t_0.9
-  }, error = function(e) {
-    # Return "Error" if an error occurs
-    "Error"
-  })
-  
-  # Append the result to the threshold_0.9 vector
-  threshold_0.9 <- c(threshold_0.9, result)
-}
 
-threshold_0.9_table <- tibble(common_name = species_list, 
-                              threshold = threshold_0.9) %>%
-  mutate(threshold = ifelse(threshold <= 0.1, 0.1, threshold),
-         threshold = ifelse(threshold >= 1, "Error", threshold))
+t_0.9 <- get_species_thresholds(species_list = species_list ,
+                                precision_target = 0.9,
+                                validated_all = validated_all,
+                                detections_2023_2024_focal = detections_2023_2024_focal)
+
+t_0.95 <- get_species_thresholds(species_list = species_list ,
+                                 precision_target = 0.95,
+                                 validated_all = validated_all,
+                                 detections_2023_2024_focal = detections_2023_2024_focal)
+
+t_0.99 <- get_species_thresholds(species_list = species_list ,
+                                 precision_target = 0.99,
+                                 validated_all = validated_all,
+                                 detections_2023_2024_focal = detections_2023_2024_focal)
+
+
+threshold_table <- tibble(common_name = species_list, 
+                          t_0.9 = t_0.9,
+                          t_0.95 = t_0.95,
+                          t_0.99 = t_0.99) %>%
+  mutate(across(c(t_0.9, t_0.95, t_0.99), ~ ifelse(. < 0.1, 0.1, ifelse(. > 1, 1, .)))) %>%
+  mutate(across(c(t_0.9, t_0.95, t_0.99), \(x) round(x, digits = 3)))
+
+
+save(object = threshold_table, 
+     file = here("docs", "tables", "threshold_table.rda"))
 
 
 # preliminary analysis ------------------------------------------------------
 
+vis_data <- detections_2023_2024_focal %>%
+  mutate(hour = fct_inorder(factor(hour))) %>%
+  left_join(threshold_table) %>%
+  drop_na(t_0.95) %>%
+  group_by(common_name) %>%
+  filter(confidence > t_0.95)
+
+my_colors <- colorRampPalette(brewer.pal(8, "Set2"))(26)
 
 
+# daily activity
+daily_pattern <- vis_data %>%
+  ggplot() +
+  geom_bar(aes(x = hour), stat = "count") +
+  facet_wrap(~common_name, scales = "free_y", ncol = 4) +
+  scale_x_discrete(labels = c("22", "", "00", "", "02", "", "04", 
+                              "", "06", "", "08", "", "10")) +
+  labs(title = "Number of species detections by time of the day (precision = 0.95)",
+       x = "Time of a day",
+       y = "Number of detections") +
+  theme_bw() +
+  theme(axis.text = element_text(size = 11),
+        axis.title = element_text(size = 16))
+
+ggsave(plot = daily_pattern,
+       filename = here("docs", "figures", "daily_pattern_0.95.PNG"),
+       width = 24,
+       height = 16,
+       units = "cm",
+       dpi = 300)
 
 
+# seasonal activity
+seasonal_pattern <- vis_data %>% 
+  ggplot() +
+  geom_bar(aes(x = date, fill = common_name), stat = "count") +
+  scale_x_date(date_breaks = "12 days",
+               date_minor_breaks = "2 days",
+               date_labels = "%b %d") +
+  scale_fill_manual(values = my_colors) +
+  facet_grid_paginate(common_name ~ year, 
+                      scales = "free", ncol = 2, nrow = 4, page = 1) + # change the page num to view
+  labs(x = "Day of year",
+       y = "Number of detections") +
+  theme_bw() +
+  theme(legend.position = "none",
+        axis.text = element_text(size = 11),
+        axis.title = element_text(size = 16),
+        axis.title.x = element_text(margin = margin(t = 6)),  
+        axis.title.y = element_text(margin = margin(r = 10)))
 
+ggsave(plot = seasonal_pattern,
+       filename = here("docs", "figures", "seasonal_pattern_0.95_1.PNG"),
+       width = 24,
+       height = 20,
+       units = "cm",
+       dpi = 300)
 
 
 
