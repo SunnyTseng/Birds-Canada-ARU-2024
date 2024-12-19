@@ -8,3 +8,5 @@ data/audio_output
 data/BirdNET_detections
 data/validation_recordings
 
+./Chilcotin_Cariboo_ARU_2023_BirdNET_output
+./Chilcotin_Cariboo_ARU_2024_BirdNET_output
