@@ -3,7 +3,7 @@ title: "Birds Canada Chilcotin ARU Analysis"
 author: "Sunny Tseng"
 date: "`r Sys.Date()`"
 always_allow_html: true
-output: github_document
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
