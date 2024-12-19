@@ -32,17 +32,14 @@ column_spec <- cols(
 
 
 # create a list of all csv files in the directory
-all_csv_files_2023 <- list.files(path = here("Chilcotin_Cariboo_ARU_2023_BirdNET_output"),
-                                 full.names = TRUE,
-                                 pattern = "\\.csv$",
-                                 recursive = TRUE)
-
-all_csv_files_2024 <- list.files(path = here("Chilcotin_Cariboo_ARU_2024_BirdNET_output"),
-                                 full.names = TRUE,
-                                 pattern = "\\.csv$",
-                                 recursive = TRUE)
-
-all_csv_files <- c(all_csv_files_2023, all_csv_files_2024)
+all_csv_files <- c(list.files(path = here("Chilcotin_Cariboo_ARU_2023_BirdNET_output"),
+                              full.names = TRUE,
+                              pattern = "\\.csv$",
+                              recursive = TRUE),
+                   list.files(path = here("Chilcotin_Cariboo_ARU_2024_BirdNET_output"),
+                              full.names = TRUE,
+                              pattern = "\\.csv$",
+                              recursive = TRUE))
 
 filtered_csv_files <- all_csv_files[!grepl("nocturnal_random_selected", all_csv_files)]
 
@@ -117,8 +114,8 @@ detections_2023_2024_focal <- detections_2023_2024 %>%
   filter(common_name %in% project_focal_species$`Species name`) 
 
 # double-check that the White-winged scoter is not detected
-project_focal_species$`Species name`[!project_focal_species$`Species name` %in% detections_2023_2024_filter$common_name]
-"Melanitta deglandi" %in% detections_2023_2024$scientific_name
+# project_focal_species$`Species name`[!project_focal_species$`Species name` %in% detections_2023_2024_filter$common_name]
+# "Melanitta deglandi" %in% detections_2023_2024$scientific_name
 
 # Save the combined data to a rda file
 save(object = detections_2023_2024_focal, file = here("data", "BirdNET_detections", "detections_2023_2024_focal.rda"))
