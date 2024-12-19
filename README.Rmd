@@ -2,7 +2,7 @@
 title: "Birds Canada ARU 2024"
 #author: "Sunny Tseng"
 #date: "`r Sys.Date()`"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -15,11 +15,11 @@ The ARU data was collected by Birds Canada during 2024 breeding season in the ar
 
 ## Working documents
 
--   Progress report
+-   [Validation protocol](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_19_species_validation_with_ShinyR.md)
 
--   Validation protocol
+-   [Mid-way progress report](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_1_focal_species_summary.md)
 
--   
+-   [Final report](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_12_18_final_report.html)
 
 ## Tasks and outcome
 
