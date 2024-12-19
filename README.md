@@ -8,6 +8,17 @@ in the area of Chilcotin, Cariboo, BC, Canada. This repository contains
 information for the data analysis contract and associated analysis
 results.
 
+## Working documents
+
+- [Validation
+  protocol](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_19_species_validation_with_ShinyR.md)
+
+- [Mid-way progress
+  report](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_1_focal_species_summary.md)
+
+- [Final
+  report](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_12_18_final_report.html)
+
 ## Tasks and outcome
 
 The outcome of the analysis are: one .csv file containing the detection
@@ -33,11 +44,11 @@ hours with itemized tasks as below). This translates to a total cost of
 \$7200 CAD. Detailed hours will be recorded while working and will be
 communicated with the Birds Canada supervisor.
 
-| Expected hours | Task                                                                                            |
-|----------------|-------------------------------------------------------------------------------------------------|
-| 8              | Data organization and documentation, collecting necessary information for the upcoming analysis |
-| 16             | Analyze 2023 ARU data through BirdNET                                                           |
-| 24             | Analyze 2024 ARU data through BirdNET                                                           |
-| 4              | Produce one single .csv file for all analyzed data                                              |
-| 8\*15          | Species specific validation (15 species)                                                        |
-| 8              | Communication (email, zoom call, etc.)                                                          |
+| Expected hours | Task |
+|----|----|
+| 8 | Data organization and documentation, collecting necessary information for the upcoming analysis |
+| 16 | Analyze 2023 ARU data through BirdNET |
+| 24 | Analyze 2024 ARU data through BirdNET |
+| 4 | Produce one single .csv file for all analyzed data |
+| 8\*15 | Species specific validation (15 species) |
+| 8 | Communication (email, zoom call, etc.) |
