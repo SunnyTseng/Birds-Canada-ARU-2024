@@ -31,14 +31,22 @@ column_spec <- cols(
 )
 
 # define directory
-dir <- "G:/Chilcotin_Cariboo_ARU_2023_2024_BirdNET_output"
+dir <- here("data", "audio_output")
+
 
 
 # create a list of all csv files in the directory
-all_csv_files <- list.files(path = dir, 
-                            full.names = TRUE, 
-                            pattern = "\\.csv$", 
-                            recursive = TRUE)
+all_csv_files_2023 <- list.files(path = here("Chilcotin_Cariboo_ARU_2023_BirdNET_output"),
+                                 full.names = TRUE,
+                                 pattern = "\\.csv$",
+                                 recursive = TRUE)
+
+all_csv_files_2024 <- list.files(path = here("Chilcotin_Cariboo_ARU_2024_BirdNET_output"),
+                                 full.names = TRUE,
+                                 pattern = "\\.csv$",
+                                 recursive = TRUE)
+
+all_csv_files <- c(all_csv_files_2023, all_csv_files_2024)
 
 filtered_csv_files <- all_csv_files[!grepl("nocturnal_random_selected", all_csv_files)]
 
