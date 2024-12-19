@@ -2,7 +2,8 @@
 title: "Birds Canada Chilcotin ARU Analysis"
 author: "Sunny Tseng"
 date: "`r Sys.Date()`"
-output: html_document
+always_allow_html: true
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -109,7 +110,7 @@ include_graphics(here("docs", "figures", "calibration_curves_logistic.PNG"))
 
 ```
 
-### Species-specific thresholds (precision = 0.9, 0.95, 0.99) 
+### Species-specific thresholds (precision = 0.9, 0.95, 0.99)
 
 To determine species-specific thresholds, I back-transformed the model output to predict the probability of each BirdNET detection being a true positive based on the reported confidence value. I then identified the confidence threshold required to achieve a certain precision (i.e., 0.9, 0.95, 0.99), meaning the percentage of detections retained after applying this threshold were true positives. For detailed methods, refer to [Tseng et al. (2024)](https://github.com/SunnyTseng/thesis_aru_BirdNET_evaluation/blob/main/R/Ch1_10_step_by_step_tutorial/species_specific_method_tutorial.md).
 
