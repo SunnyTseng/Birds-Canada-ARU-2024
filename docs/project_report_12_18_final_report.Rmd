@@ -30,13 +30,13 @@ library(knitr)
 
 ## **Audio data & BirdNET processing**
 
-Audio data were collected during the bird breeding seasons (May to July) of 2023 and 2024 in the Chilcotin Cariboo region of British Columbia, Canada. In 2023, 19 sites were surveyed, with each site monitored at one or two locations. In 2024, the survey expanded to 24 sites, each with two monitored locations. Approximately 6 TB of audio recordings were gathered over the two years. Data collection employed two models of Autonomous Recording Units (ARUs): the BAR-LT from Frontier Labs and the Song Meter Mini from Wildlife Acoustics.
+Audio data were collected during the bird breeding seasons (May to July) of 2023 and 2024 in the Chilcotin Cariboo region of British Columbia, Canada. In 2023, 19 sites were surveyed, with each site monitored at one or two locations (a total of 36 locations). In 2024, the survey expanded to 20 sites, each with two monitored locations (a total of 40 locations). Approximately 6 TB of audio recordings were gathered over the two years. Data collection employed two models of Autonomous Recording Units (ARUs): the BAR-LT from Frontier Labs and the Song Meter Mini from Wildlife Acoustics.
 
 All audio data were analyzed using BirdNET (model v2.4) with the original Python code from the [BirdNET Analyzer GitHub repository](https://github.com/kahst/BirdNET-Analyzer). Analyses were performed on a desktop computer using Visual Studio Code. While BirdNET parameters were largely kept at their default settings, specific adjustments included `result_type = "r"`, `batch_size = 4`, and `threads = 4`. To maximize detections, a minimum confidence threshold of 0.1 was applied. Processing the full 6 TB of audio data required approximately 72 hours of computer time.
 
 ## **All species - raw output**
 
-The initial BirdNET analysis identified a total of 4,704,906 detections across 5,384 classes, including birds, non-birds, and non-animal sounds. The complete dataset is available for download from the project’s GitHub page in `.rda` file format. To load and view the dataset in R, use the following line of code:
+The initial BirdNET analysis identified a total of 9,244,102 detections across 5,802 classes, including birds, non-birds, and non-animal sounds. The complete dataset is available for download from the project’s GitHub page in `.rda` file format. To load and view the dataset in R, use the following line of code:
 
 ```{r}
 
@@ -44,7 +44,7 @@ The initial BirdNET analysis identified a total of 4,704,906 detections across 5
 load(here("data", "BirdNET_detections", "detections_2023_2024.rda"))
 ```
 
-I filtered the detections using the bird species list from the [Atlas of the Breeding Birds of British Columbia](https://www.birdatlas.bc.ca/bcdata/datasummaries.jsp?extent=Prov&summtype=SpList&year=allyrs&byextent1=Prov&byextent2=Sq&region2=1&squarePC=&region1=0&square=&region3=0&lang=en), which includes 329 bird species recorded in the province. After filtering, the detection dataset was reduced to 3,247,719 detections representing 298 species. This filtered dataset can be accessed in R by subsetting the full dataset using the BC bird list as follows:
+I filtered the detections using the bird species list from the [Atlas of the Breeding Birds of British Columbia](https://www.birdatlas.bc.ca/bcdata/datasummaries.jsp?extent=Prov&summtype=SpList&year=allyrs&byextent1=Prov&byextent2=Sq&region2=1&squarePC=&region1=0&square=&region3=0&lang=en), which includes 329 bird species recorded in the province. This filtered dataset can be accessed in R by subsetting the full dataset using the BC bird list as follows:
 
 ```{r}
 

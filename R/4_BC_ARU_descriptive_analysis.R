@@ -236,6 +236,7 @@ save(object = threshold_table,
 
 # preliminary analysis ------------------------------------------------------
 
+# load(here("docs", "tables", "threshold_table.rda"))
 vis_data <- detections_2023_2024_focal %>%
   mutate(hour = fct_inorder(factor(hour))) %>%
   left_join(threshold_table) %>%

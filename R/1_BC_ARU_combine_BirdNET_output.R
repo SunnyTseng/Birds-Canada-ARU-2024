@@ -88,11 +88,12 @@ detections_2023_2024 <- detections_2023_2024_raw %>%
          datetime = paste(year, month, day, hour, minute, second, sep = "-") %>% ymd_hms(),
          date = as.Date(datetime)) %>% 
   mutate(site = str_split_i(filepath, "\\\\", 3),
+         site = str_split_i(site, " - ", 1),
          location = if_else(year == "2023", 
                             str_split_i(filepath, "\\\\", 4),
                             str_split_i(site, " - ", 2))) %>%
-  mutate(site = str_split_i(site, " - ", 1),
-         site_location = paste0(site, "_", location)) %>% 
+  mutate(site = if_else(site == "Isaac meadow", "Isaac Meadow", site)) %>%
+  mutate(site_location = paste0(site, "_", location)) %>% 
   mutate(id = row_number()) %>%
   select(id, site_location, site, location, 
          date, datetime, year, month, day, hour, minute,
@@ -104,10 +105,9 @@ save(object = detections_2023_2024, file = here("data", "BirdNET_detections", "d
 
 
 
-
 # filter data only for target species -------------------------------------
 
-project_focal_species <- read_csv(here("data", "NEW ARU Focal Species List.csv"))
+project_focal_species <- read_csv(here("data", "bird_list", "NEW ARU Focal Species List.csv"))
 load(file = here("data", "detections_2023_2024.rda"))
 
 detections_2023_2024_focal <- detections_2023_2024 %>% 
