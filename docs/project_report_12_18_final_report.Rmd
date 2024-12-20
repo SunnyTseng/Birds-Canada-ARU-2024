@@ -34,7 +34,7 @@ Audio data were collected during the bird breeding seasons (May to July) of 2023
 
 All audio data were analyzed using BirdNET (model v2.4) with the original Python code from the [BirdNET Analyzer GitHub repository](https://github.com/kahst/BirdNET-Analyzer). Analyses were performed on a desktop computer using Visual Studio Code. While BirdNET parameters were largely kept at their default settings, specific adjustments included `result_type = "r"`, `batch_size = 4`, and `threads = 4`. To maximize detections, a minimum confidence threshold of 0.1 was applied. Processing the full 6 TB of audio data required approximately 72 hours of computer time.
 
-## **All species - raw output**
+## **All species - raw output & effort**
 
 The initial BirdNET analysis identified a total of 9,244,102 detections across 5,802 classes, including birds, non-birds, and non-animal sounds. The complete dataset is available for download from the project’s GitHub page in `.rda` file format. To load and view the dataset in R, use the following line of code:
 
@@ -44,7 +44,20 @@ The initial BirdNET analysis identified a total of 9,244,102 detections across 5
 load(here("data", "BirdNET_detections", "detections_2023_2024.rda"))
 ```
 
-I filtered the detections using the bird species list from the [Atlas of the Breeding Birds of British Columbia](https://www.birdatlas.bc.ca/bcdata/datasummaries.jsp?extent=Prov&summtype=SpList&year=allyrs&byextent1=Prov&byextent2=Sq&region2=1&squarePC=&region1=0&square=&region3=0&lang=en), which includes 329 bird species recorded in the province. This filtered dataset can be accessed in R by subsetting the full dataset using the BC bird list as follows:
+The surveying effort (i.e., whether the ARU at a given site is active on a specific date) is essential for analyzing data and making inferences. I have summarized the number of active ARUs on each specific date across two years of surveys. The raw summarized effort data can be loaded using the following line of code:
+
+```{r}
+
+# edit file path as needed
+load(here("data", "effort", "effort_final.rda"))
+```
+
+```{r echo = FALSE, eval = TRUE}
+
+include_graphics(here("docs", "figures", "effort.PNG"))
+```
+
+For data quick review, I filtered the detections using the bird species list from the [Atlas of the Breeding Birds of British Columbia](https://www.birdatlas.bc.ca/bcdata/datasummaries.jsp?extent=Prov&summtype=SpList&year=allyrs&byextent1=Prov&byextent2=Sq&region2=1&squarePC=&region1=0&square=&region3=0&lang=en), which includes 329 bird species recorded in the province. This filtered dataset can be accessed in R by subsetting the full dataset using the BC bird list as follows:
 
 ```{r}
 
@@ -98,7 +111,13 @@ The objective of selecting these focal species is to identify BirdNET species-sp
 
 We selected 180 nine-second recording segments using stratified random sampling across confidence values for each target species. Subsequently, we validated whether these recordings were true positives (indicating the target species was present) or false positives (indicating the target species was absent).
 
-Sunny Tseng, David Bradley, and Remi Torrenta participated in the validation process. Sunny drafted the [validation protocol](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_19_species_validation_with_ShinyR.md) and designed an R Shiny app that supports both audio playback and spectrogram viewing. The validation process was conducted in November and December 2024. The allocation of species among the three participants can be found in this [spreadsheet](https://docs.google.com/spreadsheets/d/1Ulb9EUYBQRwxg-WvMJjte0vJT6bJMl6n/edit?gid=554288332#gid=554288332).
+Sunny Tseng, David Bradley, and Remi Torrenta participated in the validation process. Sunny drafted the [validation protocol](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_19_species_validation_with_ShinyR.md) and designed an R Shiny app that supports both audio playback and spectrogram viewing. The validation process was conducted in November and December 2024. The allocation of species among the three participants can be found in this [spreadsheet](https://docs.google.com/spreadsheets/d/1Ulb9EUYBQRwxg-WvMJjte0vJT6bJMl6n/edit?gid=554288332#gid=554288332). The validated files can be accessed by:
+
+```{r}
+
+list.files(here("data", "validation_recordings", "z_finished_files"), full.name = TRUE) %>%
+  map_dfr(read_csv)
+```
 
 ### Calibration curve
 
