@@ -57,20 +57,9 @@ load(here("data", "effort", "effort_final.rda"))
 include_graphics(here("docs", "figures", "effort.PNG"))
 ```
 
-For data quick review, I filtered the detections using the bird species list from the [Atlas of the Breeding Birds of British Columbia](https://www.birdatlas.bc.ca/bcdata/datasummaries.jsp?extent=Prov&summtype=SpList&year=allyrs&byextent1=Prov&byextent2=Sq&region2=1&squarePC=&region1=0&square=&region3=0&lang=en), which includes 329 bird species recorded in the province. This filtered dataset can be accessed in R by subsetting the full dataset using the BC bird list as follows:
+For data quick review, I filtered the detections using the bird species list from the [Atlas of the Breeding Birds of British Columbia](https://www.birdatlas.bc.ca/bcdata/datasummaries.jsp?extent=Prov&summtype=SpList&year=allyrs&byextent1=Prov&byextent2=Sq&region2=1&squarePC=&region1=0&square=&region3=0&lang=en), which includes 329 bird species recorded in the province. It is important to note that these detections have not yet been validated, so we cannot confirm that they represent the total number of species detected in the study area. However, these provide an overview of the number of detections and species across different sites.
 
-```{r}
-
-# edit file path as needed
-bc_list <- read_csv(here("data", "bird_list", "atlasdata_bc_birdlist.csv"))
-
-detections_bc <- detections_2023_2024 %>%
-  filter(common_name %in% bc_list$Species) 
-```
-
-It is important to note that these detections have not yet been validated, so we cannot confirm that they represent the total number of species detected in the study area. However, these provide an overview of the number of detections and species across different sites. A comprehensive species validation process is required to accurately verify species richness. This process involves confirming the presence of each species by validating at least one recording segment per species.
-
-Although this validation was not performed in the current analysis, it can be achieved by selecting the top 5 or 10 detections for each species and verifying their presence. This approach would provide a more reliable estimate of the species richness in the study area.
+A comprehensive species validation process is required to accurately verify species richness. Although this validation was not performed in the current analysis, it can be achieved by selecting the top 5 or 10 detections for each species and verifying their presence. This approach would provide a more reliable estimate of the species richness in the study area.
 
 ```{r echo = FALSE, eval = TRUE}
 
