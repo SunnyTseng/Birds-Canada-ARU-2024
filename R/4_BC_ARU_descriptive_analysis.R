@@ -112,7 +112,8 @@ bc_list <- read_csv(here("data", "bird_list", "atlasdata_bc_birdlist.csv"))
 
 # define column types for read_csv
 column_spec <- cols(
-  date = col_datetime(),
+  date = col_character(),
+  datetime = col_character(),
   start = col_double(),
   end = col_double(),
   scientific_name = col_character(),
@@ -127,6 +128,8 @@ validated_all <- list.files(here("data", "validation_recordings", "z_finished_fi
   filter(validation != "U") %>%
   mutate(validation = ifelse(validation == "y", "Y", validation)) %>%
   mutate(validation = ifelse(validation == "Y", 1, 0)) %>%
+  mutate(date = parse_date_time(date, orders = c("ymd", "mdy")),
+         datetime = ymd_hms(datetime)) %>%
   drop_na(validation, confidence, common_name)
 
 
