@@ -13,6 +13,8 @@ results.
 - [Validation
   protocol](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_19_species_validation_with_ShinyR.md)
 
+- [Who validated what]([https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_19_species_validation_with_ShinyR.md](https://docs.google.com/spreadsheets/d/1Ulb9EUYBQRwxg-WvMJjte0vJT6bJMl6n/edit?gid=554288332#gid=554288332))
+
 - [Mid-way progress
   report](https://github.com/SunnyTseng/Birds-Canada-ARU-2024/blob/main/docs/project_report_11_1_focal_species_summary.md)
 
