@@ -107,9 +107,23 @@ load(here("data", "BirdNET_detections", "detections_2023_2024_focal.rda"))
 
 bc_list <- read_csv(here("data", "bird_list", "atlasdata_bc_birdlist.csv"))
 
+
+
+
+# define column types for read_csv
+column_spec <- cols(
+  date = col_datetime(),
+  start = col_double(),
+  end = col_double(),
+  scientific_name = col_character(),
+  common_name = col_character(),
+  confidence = col_double()
+)
+
+
 validated_all <- list.files(here("data", "validation_recordings", "z_finished_files"), 
                             full.name = TRUE) %>%
-  map_dfr(read_csv) %>%
+  map_dfr(read_csv, col_types = column_spec) %>%
   filter(validation != "U") %>%
   mutate(validation = ifelse(validation == "y", "Y", validation)) %>%
   mutate(validation = ifelse(validation == "Y", 1, 0)) %>%
@@ -159,7 +173,7 @@ save(object = site_info_bc,
 # calibration curves ------------------------------------------------------
 
 coul <- brewer.pal(12, "Paired") 
-coul <- colorRampPalette(coul)(19)
+coul <- colorRampPalette(coul)(25)
 
 g <- ggplot(validated_all, aes(x = confidence, 
                                y = validation, 

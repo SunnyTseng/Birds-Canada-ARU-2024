@@ -108,6 +108,8 @@ list.files(here("data", "validation_recordings", "z_finished_files"), full.name 
   map_dfr(read_csv)
 ```
 
+Out of the 27 target species, five species had no confirmed true detections during the validation process: White-winged Scoter, Band-tailed Pigeon, American Bittern and Yellow Rail. Additionally, two species require further attention for re-validation. The validation of Trumpeter Swan, whose vocalizations are often confused with goose vocalizations, was initially conducted by Sunny; however, a secondary review is recommended to ensure accuracy. Similarly, the Sharp-tailed Grouse vocalizations should be re-evaluated to confirm the detections.
+
 ### Calibration curve
 
 Using the validated dataset, I employed a generalized linear model with a binomial distribution to analyze the relationship between true/false positives (response variable) and BirdNET confidence values (predictor variables). This analysis will allow us to determine how BirdNET confidence relates to true positive detections. The calibration curves for each species indicate that most species can achieve a probability of being a true positive of approximately 0.75 when the BirdNET confidence value ranges from 0.25 to 0.40.
@@ -121,6 +123,8 @@ include_graphics(here("docs", "figures", "calibration_curves_logistic.PNG"))
 ### Species-specific thresholds (precision = 0.9, 0.95, 0.99)
 
 To determine species-specific thresholds, I back-transformed the model output to predict the probability of each BirdNET detection being a true positive based on the reported confidence value. I then identified the confidence threshold required to achieve a certain precision (i.e., 0.9, 0.95, 0.99), meaning the percentage of detections retained after applying this threshold were true positives. For detailed methods, refer to [Tseng et al. (2024)](https://github.com/SunnyTseng/thesis_aru_BirdNET_evaluation/blob/main/R/Ch1_10_step_by_step_tutorial/species_specific_method_tutorial.md).
+
+A confidence threshold equals to one representing the Generalized Linear Model did not converge successfully.
 
 ```{r echo = FALSE, eval = TRUE}
 
@@ -153,4 +157,7 @@ include_graphics(here("docs", "figures", "seasonal_pattern_0.95_2.PNG"))
 
 include_graphics(here("docs", "figures", "seasonal_pattern_0.95_3.PNG"))
 
+include_graphics(here("docs", "figures", "seasonal_pattern_0.95_4.PNG"))
+
+include_graphics(here("docs", "figures", "seasonal_pattern_0.95_5.PNG"))
 ```
