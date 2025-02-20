@@ -11,39 +11,26 @@ library(ggforce)
 
 # functions ---------------------------------------------------------------
 
-# find precision given a threshold
-threshold2precision <- function(probability_data, threshold){
-  threshold <- probability_data %>%
-    filter(confidence > threshold) %>%
-    pull(probability) %>%
-    mean()
-}
-
-
-# find the data ramained given a threshold
-threshold2remain <- function(probability_data, threshold){
-  remain <- probability_data %>%
-    filter(confidence > threshold) %>%
-    nrow()
-  
-  remain/nrow(probability_data)
-}
-
-
-# function to determine the threshold given specified precision level
-precision2threshold <- function(threshold_table, precision){
-  model <- glm(precision ~ threshold, 
-               data = threshold_table,
-               family = binomial)
-  
-  (log(precision/(1 - precision)) - model$coefficients[1])/model$coefficients[2]
-  
-}
-
-
 # function to get the threshold given desired precision for multiple species
 get_species_thresholds <- function(species_list, precision_target, 
                                    validated_all, detections_2023_2024_focal) {
+  
+  # find precision given a threshold
+  threshold2precision <- function(probability_data, threshold){
+    threshold <- probability_data %>%
+      filter(confidence > threshold) %>%
+      pull(probability) %>%
+      mean()
+  }
+  
+  # function to determine the threshold given specified precision level
+  precision2threshold <- function(threshold_table, precision){
+    model <- glm(precision ~ threshold, 
+                 data = threshold_table,
+                 family = binomial)
+    
+    (log(precision/(1 - precision)) - model$coefficients[1])/model$coefficients[2]
+  }
   
   # Initialize the vector to store results
   thresholds <- numeric(length(species_list))
@@ -51,47 +38,44 @@ get_species_thresholds <- function(species_list, precision_target,
   
   for (species in species_list) {
     
-    # Attempt to fit the model, handle warnings/errors
-    model <- tryCatch(
+    # Attempt to fit the model and find threshold
+    precision_table <- tryCatch(
       {
-        validated_all %>%
+        model <- validated_all %>%
           filter(common_name == species) %>%
           glm(validation ~ confidence, 
               data = ., 
               family = binomial)
+        
+        probability <- detections_2023_2024_focal %>%
+          filter(common_name == species) %>%
+          mutate(probability = predict(model, newdata = ., type = "response"))
+        
+        tibble(threshold = seq(0, 1, 0.001)) %>%
+          mutate(precision = map_dbl(.x = threshold, 
+                                     .f = ~ threshold2precision(probability, .x))) 
       },
+      
       warning = function(w) {
         message(paste("Warning for species:", species, "-", conditionMessage(w)))
-        return(NULL)  # Return NULL if there's a warning
+        return(NULL)  # Return NULL for warning
       },
+      
       error = function(e) {
         message(paste("Error for species:", species, "-", conditionMessage(e)))
-        return(NULL)  # Return NULL if there's an error
+        return(NULL)  # Return NULL for errors
       }
     )
     
-    # If the model is NULL (did not converge), assign threshold of 1
-    if (is.null(model)) {
+    # Handle the result of tryCatch
+    if (is.null(precision_table)) {
+      message(paste("Skipping species due to model not converging:", species))
       thresholds[species] <- 1
-      next  # Skip the remaining steps for this iteration
+      next  # Skip the rest of the loop for this species
     }
     
-    # Predict probabilities for the species
-    probability <- detections_2023_2024_focal %>%
-      filter(common_name == species) %>%
-      mutate(probability = predict(model, newdata = ., type = "response")) 
-    
-    # Create a threshold table with precision and data retention
-    threshold_table <- tibble(threshold = seq(0, 1, 0.001)) %>%
-      mutate(data_remained = map_dbl(.x = threshold, 
-                                     .f = ~ threshold2remain(probability, .x))) %>%
-      mutate(precision = map_dbl(.x = threshold, 
-                                 .f = ~ threshold2precision(probability, .x)))
-    
-    # Get the threshold for the desired precision
-    t_target <- precision2threshold(threshold_table, precision_target)
-    
-    # Append the result to the thresholds vector
+    # Assign the calculated threshold
+    t_target <- precision2threshold(precision_table, precision_target)
     thresholds[species] <- t_target
   }
   
@@ -101,16 +85,13 @@ get_species_thresholds <- function(species_list, precision_target,
 
 # data input --------------------------------------------------------------
 
-
-load(here("data", "BirdNET_detections", "detections_2023_2024.rda"))
+# filtered BirdNET detections for the 27 focal species
 load(here("data", "BirdNET_detections", "detections_2023_2024_focal.rda"))
 
+# bird list of BC
 bc_list <- read_csv(here("data", "bird_list", "atlasdata_bc_birdlist.csv"))
 
-
-
-
-# define column types for read_csv
+# all validated data by Sunny, Remi and David
 column_spec <- cols(
   date = col_character(),
   datetime = col_character(),
@@ -121,16 +102,15 @@ column_spec <- cols(
   confidence = col_double()
 )
 
-
 validated_all <- list.files(here("data", "validation_recordings", "z_finished_files"), 
                             full.name = TRUE) %>%
   map_dfr(read_csv, col_types = column_spec) %>%
   filter(validation != "U") %>%
-  mutate(validation = ifelse(validation == "y", "Y", validation)) %>%
-  mutate(validation = ifelse(validation == "Y", 1, 0)) %>%
+  mutate(validation = ifelse(validation == "y", "Y", validation),
+         validation = ifelse(validation == "Y", 1, 0)) %>%
   mutate(date = parse_date_time(date, orders = c("ymd", "mdy")),
          datetime = ymd_hms(datetime)) %>%
-  drop_na(validation, confidence, common_name)
+  drop_na(validation, confidence, common_name) 
 
 
 
@@ -218,10 +198,16 @@ ggsave(plot = g,
 
 # species-specific thresholds ---------------------------------------------
 
+
 species_list <- validated_all %>% 
   pull(common_name) %>% 
-  unique()
+  unique() 
 
+species_list_zero <- validated_all %>%
+  group_by(common_name) %>%
+  summarise(all_zero = sum(validation)) %>%
+  filter(all_zero == 0) %>%
+  pull(common_name)
 
 t_0.9 <- get_species_thresholds(species_list = species_list ,
                                 precision_target = 0.9,
@@ -238,13 +224,13 @@ t_0.99 <- get_species_thresholds(species_list = species_list ,
                                  validated_all = validated_all,
                                  detections_2023_2024_focal = detections_2023_2024_focal)
 
-
 threshold_table <- tibble(common_name = species_list, 
                           t_0.9 = t_0.9,
                           t_0.95 = t_0.95,
                           t_0.99 = t_0.99) %>%
   mutate(across(c(t_0.9, t_0.95, t_0.99), ~ ifelse(. < 0.1, 0.1, ifelse(. > 1, 1, .)))) %>%
-  mutate(across(c(t_0.9, t_0.95, t_0.99), \(x) round(x, digits = 3)))
+  mutate(across(c(t_0.9, t_0.95, t_0.99), ~ ifelse(common_name %in% species_list_zero, 1, .))) %>%
+  mutate(across(c(t_0.9, t_0.95, t_0.99), \(x) round(x, digits = 3))) 
 
 
 save(object = threshold_table, 
@@ -281,7 +267,7 @@ daily_pattern <- vis_data %>%
 ggsave(plot = daily_pattern,
        filename = here("docs", "figures", "daily_pattern_0.95.PNG"),
        width = 24,
-       height = 16,
+       height = 18,
        units = "cm",
        dpi = 300)
 
